@@ -8,3 +8,4 @@ router.post('/login', authValidator.login, authController.login);
 router.post('/forgot-password', authValidator.forgotPassword, authController.forgotPassword);
 
 module.exports = router;
+//check
