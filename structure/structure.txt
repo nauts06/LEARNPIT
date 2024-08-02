@@ -1,0 +1,35 @@
+/backend
+│
+├── /config
+│   ├── db.js              # Database connection setup
+│   └── config.js          # Configuration (e.g., JWT secret, mailer config)
+│
+├── /controllers
+│   ├── authController.js  # Handles authentication (login, register, forgot password)
+│   └── userController.js  # Handles user management
+│
+├── /middleware
+│   ├── authMiddleware.js  # Middleware for JWT authentication
+│   └── roleMiddleware.js  # Middleware to check user roles
+│
+├── /models
+│   ├── userModel.js       # User model schema
+│   └── tokenModel.js      # Model for storing JWT tokens (optional, for logout functionality)
+│
+├── /routes
+│   ├── authRoutes.js      # Routes for authentication (login, register, forgot password)
+│   └── userRoutes.js      # Routes for user management (e.g., profile updates)
+│
+├── /utils
+│   ├── mailer.js          # Utility for sending emails (e.g., password reset links)
+│   └── jwtUtils.js        # Utility functions for JWT creation and verification
+│
+├── /validators
+│   ├── authValidator.js   # Input validation for authentication requests
+│   └── userValidator.js   # Input validation for user data
+│
+├── /uploads               # Directory for file uploads (e.g., profile pictures)
+│
+├── .env                   # Environment variables
+├── app.js                 # Main application file
+└── package.json           # Project metadata and dependencies
