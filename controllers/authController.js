@@ -23,19 +23,75 @@ exports.register = async (req, res) => {
   }
 };
 
+
+
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('Login attempt:', email);
+
     const user = await User.findOne({ email });
+    console.log('User found:', user);
+
     if (!user || !(await bcrypt.compare(password, user.password))) {
+      console.log('Invalid credentials');
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-    const token = jwt.sign({ id: user._id, role: user.role }, config.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
+
+    const accessToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const refreshToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+
+    console.log('Access token generated:', accessToken);
+    console.log('Refresh token generated:', refreshToken);
+
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });  // <-- Ensure this doesn't trigger validation
+
+    console.log('Refresh token saved to user');
+    res.json({ accessToken, refreshToken });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error during login:', error);
+    res.status(500).json({ message: 'Server error', error });
   }
 };
+
+
+exports.refreshToken = async (req, res) => {
+  try {
+    const { token: refreshToken } = req.body;
+
+    console.log("am looking", refreshToken);
+    
+    if (!refreshToken) {
+      return res.status(400).json({ message: 'Refresh token is required' });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    } catch (error) {
+      return res.status(400).json({ message: 'Invalid refresh token' });
+    }
+
+    const user = await User.findById(decoded.id);
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(400).json({ message: 'Invalid refresh token' });
+    }
+
+    const newAccessToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const newRefreshToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+
+    user.refreshToken = newRefreshToken;
+    await user.save({ validateBeforeSave: false }); // Ensure validation is bypassed
+
+    res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+  } catch (error) {
+    console.error('Error during refresh token:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
 
 exports.forgotPassword = async (req, res) => {
   try {
@@ -43,7 +99,7 @@ exports.forgotPassword = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'User not found' });
 
-    const token = jwt.sign({ id: user._id }, config.JWT_SECRET, { expiresIn: '15m' });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
     const resetLink = `http://yourdomain.com/reset-password?token=${token}`;
     
     // Send the reset link via email

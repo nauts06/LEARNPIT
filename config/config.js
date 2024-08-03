@@ -1,6 +1,7 @@
 module.exports = {
-    JWT_SECRET: 'your_jwt_secret_key',
-    DB_URI: 'mongodb://localhost:27017/your_db_name',
-    // Other configuration variables (e.g., email service credentials)
-  };
-  
+  JWT_SECRET: process.env.JWT_SECRET,
+  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
+  MONGO_URI: process.env.MONGO_URI,
+  EMAIL_USER: process.env.EMAIL_USER,
+  EMAIL_PASS: process.env.EMAIL_PASS,
+};
