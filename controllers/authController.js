@@ -57,6 +57,7 @@ exports.login = async (req, res) => {
 };
 
 
+
 exports.refreshToken = async (req, res) => {
   try {
     const { token: refreshToken } = req.body;
@@ -100,7 +101,7 @@ exports.forgotPassword = async (req, res) => {
     if (!user) return res.status(400).json({ message: 'User not found' });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
-    const resetLink = `http://yourdomain.com/reset-password?token=${token}`;
+    const resetLink = `http://localhost:4000/reset-password?token=${token}`;
     
     // Send the reset link via email
     await mailer.sendMail(email, 'Password Reset', `Click the link to reset your password: ${resetLink}`);
