@@ -1,7 +1,7 @@
 const { body, validationResult } = require('express-validator');
 
 exports.register = [
-  body('name').notEmpty().withMessage('Name is required'),
+  body('userName').notEmpty().withMessage('Name is required'),
   body('email').isEmail().withMessage('Please enter a valid email'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
   body('confirmPassword')
